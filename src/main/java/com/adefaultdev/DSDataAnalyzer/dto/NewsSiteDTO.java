@@ -1,13 +1,8 @@
 package com.adefaultdev.DSDataAnalyzer.dto;
 
-import lombok.Data;
-
-@Data
-public class NewsSiteDTO {
-
-    private Long id;
-    private String address;
-    private String name;
-    private Double trustIndex;
-
-}
+public record NewsSiteDTO(
+        Long id,
+        String address,
+        String name,
+        Double trustIndex
+) {}
