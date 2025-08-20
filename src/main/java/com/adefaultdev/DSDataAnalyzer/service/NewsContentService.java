@@ -41,21 +41,24 @@ public class NewsContentService {
 
     private NewsContentDTO convertToDTO(NewsContent content) {
 
-        NewsContentDTO dto = new NewsContentDTO();
-        dto.setId(content.getId());
-        dto.setTheme(content.getTheme());
-        dto.setContent(content.getContent());
-        dto.setSiteId(content.getSite().getId());
-        return dto;
+        return new NewsContentDTO(
+                content.getId(),
+                content.getTheme(),
+                content.getContent(),
+                LocalDateTime.now(),
+                content.getSite().getId(),
+                content.getSite().toString());
 
     }
 
     private NewsContent convertToEntity(NewsContentDTO dto) {
 
         NewsContent content = new NewsContent();
-        content.setTheme(dto.getTheme());
-        content.setContent(dto.getContent());
-        content.setSite(newsSiteRepository.findById(dto.getSiteId()).orElseThrow());
+        content.setTheme(dto.theme());
+        content.setContent(dto.content());
+        content.setDate(dto.date());
+        content.setSite(newsSiteRepository.findById(dto.siteId()).orElseThrow());
+
         return content;
 
     }
