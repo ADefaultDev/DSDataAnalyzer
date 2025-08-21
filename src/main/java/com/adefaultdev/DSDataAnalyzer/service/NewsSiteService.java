@@ -5,10 +5,12 @@ import com.adefaultdev.DSDataAnalyzer.dto.NewsSiteDTO;
 import com.adefaultdev.DSDataAnalyzer.model.NewsContent;
 import com.adefaultdev.DSDataAnalyzer.model.NewsSite;
 import com.adefaultdev.DSDataAnalyzer.repository.NewsSiteRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -16,46 +18,44 @@ public class NewsSiteService {
 
     private final NewsSiteRepository newsSiteRepository;
 
-    public NewsSite createOrUpdateSite(NewsSite site) {
-        return newsSiteRepository.save(site);
+    public NewsSiteDTO createOrUpdateSite(NewsSiteDTO dto) {
+        NewsSite entity = convertToEntity(dto);
+        NewsSite saved = newsSiteRepository.save(entity);
+        return convertToDTO(saved);
     }
 
-    public List<NewsSite> getAllSites() {
-        return newsSiteRepository.findAll();
+    public List<NewsSiteDTO> getAllSites() {
+        return newsSiteRepository.findAll()
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public NewsSite getSiteByAddress(String address) {
-        return newsSiteRepository.findByAddress(address);
+    public NewsSiteDTO getSiteByAddress(String address) {
+        NewsSite site = newsSiteRepository.findByAddress(address);
+        return site != null ? convertToDTO(site) : null;
     }
 
+    @Transactional
     public void updateTrustIndex(Long siteId, double newIndex) {
-
-        newsSiteRepository.findById(siteId).ifPresent(site -> {
-            site.setTrustIndex(newIndex);
-            newsSiteRepository.save(site);
-
-        });
+        newsSiteRepository.findById(siteId).ifPresent(site -> site.setTrustIndex(newIndex));
     }
 
     private NewsSiteDTO convertToDTO(NewsSite site) {
-
-        NewsSiteDTO dto = new NewsSiteDTO();
-        dto.setId(site.getId());
-        dto.setAddress(site.getAddress());
-        dto.setName(site.getName());
-        dto.setTrustIndex(site.getTrustIndex());
-        return dto;
-
+        return new NewsSiteDTO(
+                site.getId(),
+                site.getAddress(),
+                site.getName(),
+                site.getTrustIndex()
+        );
     }
 
-    private NewsContent convertToEntity(NewsContentDTO dto) {
-
-        NewsContent content = new NewsContent();
-        content.setTheme(dto.getTheme());
-        content.setContent(dto.getContent());
-        content.setSite(newsSiteRepository.findById(dto.getSiteId()).orElseThrow());
-        return content;
-
+    private NewsSite convertToEntity(NewsSiteDTO dto) {
+        NewsSite site = new NewsSite();
+        site.setId(dto.id());
+        site.setAddress(dto.address());
+        site.setName(dto.name());
+        site.setTrustIndex(dto.trustIndex());
+        return site;
     }
-
 }
