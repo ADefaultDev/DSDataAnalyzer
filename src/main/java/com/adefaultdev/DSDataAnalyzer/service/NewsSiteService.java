@@ -5,6 +5,7 @@ import com.adefaultdev.DSDataAnalyzer.dto.NewsSiteDTO;
 import com.adefaultdev.DSDataAnalyzer.model.NewsContent;
 import com.adefaultdev.DSDataAnalyzer.model.NewsSite;
 import com.adefaultdev.DSDataAnalyzer.repository.NewsSiteRepository;
+import com.rometools.rome.feed.synd.SyndEntry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -57,5 +58,8 @@ public class NewsSiteService {
         site.setName(dto.name());
         site.setTrustIndex(dto.trustIndex());
         return site;
+    }
+
+    public void saveNews(List<SyndEntry> news) {
     }
 }
