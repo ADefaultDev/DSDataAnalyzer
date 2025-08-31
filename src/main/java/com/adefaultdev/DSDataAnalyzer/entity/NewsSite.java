@@ -1,4 +1,4 @@
-package com.adefaultdev.DSDataAnalyzer.model;
+package com.adefaultdev.DSDataAnalyzer.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -11,6 +11,13 @@ import jakarta.persistence.GenerationType;
 import lombok.Data;
 import java.util.List;
 
+/**
+ * Entity for news sites.
+ * Contains all fields for news site class in database.
+ *
+ * @author ADefaultDev
+ * @since 1.0.0
+ */
 @Entity
 @Table(name = "news_sites")
 @Data
@@ -29,7 +36,9 @@ public class NewsSite {
     @Column(name = "trust_index")
     private Double trustIndex;
 
+    @Column(name = "processed_count", nullable = false)
+    private Long processedCount = 0L;
+
     @OneToMany(mappedBy = "site", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NewsContent> contents;
-
 }

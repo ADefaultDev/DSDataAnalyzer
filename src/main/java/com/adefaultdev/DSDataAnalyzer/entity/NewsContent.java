@@ -1,4 +1,4 @@
-package com.adefaultdev.DSDataAnalyzer.model;
+package com.adefaultdev.DSDataAnalyzer.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +12,13 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import java.time.LocalDateTime;
 
+/**
+ * Entity for news content.
+ * Contains all fields for news content class in database.
+ *
+ * @author ADefaultDev
+ * @since 1.0.0
+ */
 @Entity
 @Table(name = "news_contents")
 @Data
@@ -33,5 +40,4 @@ public class NewsContent {
 
     @Column(nullable = false)
     private LocalDateTime date;
-
 }
