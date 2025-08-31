@@ -1,30 +1,49 @@
 package com.adefaultdev.DSDataAnalyzer.service;
 
-import com.adefaultdev.DSDataAnalyzer.dto.NewsContentDTO;
 import com.adefaultdev.DSDataAnalyzer.dto.NewsSiteDTO;
-import com.adefaultdev.DSDataAnalyzer.model.NewsContent;
-import com.adefaultdev.DSDataAnalyzer.model.NewsSite;
+import com.adefaultdev.DSDataAnalyzer.entity.NewsSite;
 import com.adefaultdev.DSDataAnalyzer.repository.NewsSiteRepository;
-import com.rometools.rome.feed.synd.SyndEntry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Service for managing news site operations.
+ * Handles creation, retrieval, and updating of news site information.
+ *
+ * <p>Dependency injected via Lombok:</p>
+ * <ul>
+ *   <li>{@link NewsSiteRepository} - Handles news site data access</li>
+ * </ul>
+ *
+ * @since 1.0.0
+ * @author ADefaultDev
+ */
 @Service
 @RequiredArgsConstructor
 public class NewsSiteService {
 
     private final NewsSiteRepository newsSiteRepository;
 
+    /**
+     * Creates or updates a news site from DTO.
+     *
+     * @param dto NewsSiteDTO with site details
+     * @return created/updated NewsSiteDTO
+     */
     public NewsSiteDTO createOrUpdateSite(NewsSiteDTO dto) {
         NewsSite entity = convertToEntity(dto);
         NewsSite saved = newsSiteRepository.save(entity);
         return convertToDTO(saved);
     }
 
+    /**
+     * Retrieves all news sites.
+     *
+     * @return list of all NewsSiteDTOs
+     */
     public List<NewsSiteDTO> getAllSites() {
         return newsSiteRepository.findAll()
                 .stream()
@@ -32,16 +51,35 @@ public class NewsSiteService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves news site by address.
+     *
+     * @param address site address/URL
+     * @return NewsSiteDTO or null if not found
+     */
     public NewsSiteDTO getSiteByAddress(String address) {
-        NewsSite site = newsSiteRepository.findByAddress(address);
-        return site != null ? convertToDTO(site) : null;
+        return newsSiteRepository.findByAddress(address)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 
+    /**
+     * Updates trust index for a news site.
+     *
+     * @param siteId news site ID
+     * @param newIndex new trust index value
+     */
     @Transactional
     public void updateTrustIndex(Long siteId, double newIndex) {
         newsSiteRepository.findById(siteId).ifPresent(site -> site.setTrustIndex(newIndex));
     }
 
+    /**
+     * Converts NewsSite entity to DTO.
+     *
+     * @param site NewsSite entity
+     * @return NewsSiteDTO
+     */
     private NewsSiteDTO convertToDTO(NewsSite site) {
         return new NewsSiteDTO(
                 site.getId(),
@@ -51,15 +89,38 @@ public class NewsSiteService {
         );
     }
 
+    /**
+     * Converts NewsSiteDTO to entity.
+     * Looks up existing site by address or creates new one.
+     *
+     * @param dto NewsSiteDTO
+     * @return NewsSite entity
+     */
     private NewsSite convertToEntity(NewsSiteDTO dto) {
-        NewsSite site = new NewsSite();
-        site.setId(dto.id());
-        site.setAddress(dto.address());
-        site.setName(dto.name());
-        site.setTrustIndex(dto.trustIndex());
-        return site;
+        return newsSiteRepository.findByAddress(dto.address())
+                .map(existingSite -> {
+                    existingSite.setName(dto.name());
+                    existingSite.setTrustIndex(dto.trustIndex());
+                    return existingSite;
+                })
+                .orElseGet(() -> {
+                    NewsSite newSite = new NewsSite();
+                    newSite.setAddress(dto.address());
+                    newSite.setName(dto.name());
+                    newSite.setTrustIndex(dto.trustIndex());
+                    return newSite;
+                });
     }
 
-    public void saveNews(List<SyndEntry> news) {
+    /**
+     * Retrieves news site by name.
+     *
+     * @param name site name
+     * @return NewsSiteDTO or null if not found
+     */
+    public NewsSiteDTO getSiteByName(String name) {
+        return newsSiteRepository.findByName(name)
+                .map(this::convertToDTO)
+                .orElse(null);
     }
 }
