@@ -46,7 +46,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/google-news/**",
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/api/ai/**"
                         ).permitAll()
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
