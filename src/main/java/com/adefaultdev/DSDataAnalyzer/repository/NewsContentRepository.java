@@ -1,7 +1,10 @@
 package com.adefaultdev.DSDataAnalyzer.repository;
 
 import com.adefaultdev.DSDataAnalyzer.entity.NewsContent;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,4 +21,7 @@ public interface NewsContentRepository extends JpaRepository<NewsContent, Long> 
     List<NewsContent> findByDateBetween(LocalDateTime start, LocalDateTime end);
     List<NewsContent> findByThemeContainingIgnoreCase(String keyword);
     List<NewsContent> findByDateAfter(LocalDateTime fromDate);
+
+    @Query("SELECT n FROM NewsContent n ORDER BY n.date DESC")
+    List<NewsContent> findLatestNews(Pageable pageable);
 }
