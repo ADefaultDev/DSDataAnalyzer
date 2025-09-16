@@ -8,14 +8,13 @@ import com.adefaultdev.DSDataAnalyzer.repository.UserRepository;
 import com.adefaultdev.DSDataAnalyzer.security.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,17 +53,11 @@ public class AuthController {
      */
     @Operation(
             summary = "New user's registration",
-            requestBody = @RequestBody(
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     description = "New user's credentials",
                     content = @Content(
-                            schema = @Schema(implementation = RegisterRequest.class),
-                            examples = @ExampleObject(value = """
-                                {
-                                  "username": "new_user",
-                                  "password": "password123",
-                                }
-                                """)
+                            schema = @Schema(implementation = RegisterRequest.class)
                     )
             ),
             responses = {
@@ -97,18 +90,12 @@ public class AuthController {
      * @return ResponseEntity with JWT token on success or error message on failure
      */
     @Operation(
-            summary = "New user's registration",
-            requestBody = @RequestBody(
+            summary = "Logging request",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
-                    description = "New user's credentials",
+                    description = "User's credentials",
                     content = @Content(
-                            schema = @Schema(implementation = RegisterRequest.class),
-                            examples = @ExampleObject(value = """
-                                {
-                                  "username": "admin",
-                                  "password": "admin123",
-                                }
-                                """)
+                            schema = @Schema(implementation = LoginRequest.class)
                     )
             ),
             responses = {
