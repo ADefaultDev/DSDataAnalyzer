@@ -1,7 +1,6 @@
 package com.adefaultdev.DSDataAnalyzer.security;
 
 import com.adefaultdev.DSDataAnalyzer.entity.User;
-import lombok.Getter;
 import lombok.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,7 +15,6 @@ import java.util.List;
  * @since 1.0.0
  * @author ADefaultDev
  */
-@Getter
 public record UserDetailsImpl(User user) implements UserDetails {
 
     /**
