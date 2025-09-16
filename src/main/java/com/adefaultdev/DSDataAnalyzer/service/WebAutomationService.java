@@ -7,43 +7,61 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.devtools.v139.network.Network;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Service responsible for automating browser actions with ChromeDriver.
+ * This service is focused on:
+ * <ul>
+ *   <li>Initializing ChromeDriver with "stealth" options to make Cloudflare passable by manual captcha solving.</li>
+ *   <li>Opening a target website with custom browser settings such as user-agent, disabled automation flags, etc.</li>
+ *   <li>Applying JavaScript overrides to mask the automation environment.</li>
+ * </ul>
+ *
+ * @since 1.1.0
+ * @author ADefaultDev
+ */
 @Service
 @RequiredArgsConstructor
 public class WebAutomationService {
 
-    private final CookieManagerService cookieManagerService;
-
-    @Value("${browser.chrome.userDataDir}")
-    private String userDataDir;
-
-    @Value("${browser.chrome.profileDirectory}")
-    private String profileDirectory;
-
     /**
-     * Автоматически открывает сайт с подгруженными куками (через настройки из application.yml).
+     * Opens a given URL using a ChromeDriver instance initialized in "stealth mode".
+     *
+     * @param url      the website URL to open
+     * @param headless whether to run the browser in headless mode (without GUI)
      */
     public void openSite(String url, boolean headless) {
-
+        ChromeDriver driver;
         try {
-            ChromeDriver driver = initStealthDriver(headless);
+            driver = initStealthDriver(headless);
             WebDriverRunner.setWebDriver(driver);
 
             driver.get(url);
 
-            System.out.println("Сайт открыт с использованием сохранённых cookies.");
-        } catch (Exception e) {
-            System.out.println("Ошибка при автоматическом открытии сайта: " + e.getMessage());
-            e.printStackTrace();
+        } catch (Exception ignored) {
+
         }
     }
 
+    /**
+     * Initializes a ChromeDriver instance with stealth options to avoid bot detection.
+     * <p>
+     * This includes:
+     * <ul>
+     *   <li>Custom User-Agent string</li>
+     *   <li>Disabling Chrome automation flags</li>
+     *   <li>Overriding WebDriver-specific properties in JavaScript</li>
+     *   <li>Configuring DevTools to override network-level User-Agent</li>
+     *   <li>Disabling certain Chrome features (extensions, background networking, GPU, etc.)</li>
+     * </ul>
+     *
+     * @param headless whether to run the browser in headless mode
+     * @return a configured ChromeDriver instance
+     */
     private ChromeDriver initStealthDriver(boolean headless) {
         ChromeOptions options = new ChromeOptions();
 
@@ -89,42 +107,45 @@ public class WebAutomationService {
                         Optional.empty(),
                         Optional.empty(),
                         Optional.empty()));
-                devTools.send(Network.setUserAgentOverride(userAgent, Optional.empty(), Optional.empty(), Optional.empty()));
+                devTools.send(Network.setUserAgentOverride(userAgent,
+                        Optional.empty(),
+                        Optional.empty(),
+                        Optional.empty()));
 
             } catch (Exception ignored) {
             }
 
-            JavascriptExecutor js = driver;
-
-            js.executeScript(
+            // Apply JavaScript overrides to mask automation environment
+            ((JavascriptExecutor) driver).executeScript(
                     "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});"
             );
 
-            js.executeScript(
+            ((JavascriptExecutor) driver).executeScript(
                     "window.chrome = window.chrome || {runtime: {}};"
             );
 
-            js.executeScript(
+            ((JavascriptExecutor) driver).executeScript(
                     "Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3,4]});" +
                             "Object.defineProperty(navigator, 'languages', {get: () => ['en-US','en']});"
             );
 
-            js.executeScript(
+            ((JavascriptExecutor) driver).executeScript(
                     "const originalQuery = window.navigator.permissions.query;" +
                             "window.navigator.permissions.query = (parameters) => (" +
                             "  parameters.name === 'notifications' ? Promise.resolve({ state: Notification.permission }) : originalQuery(parameters)" +
                             ");"
             );
 
-            js.executeScript(
+            ((JavascriptExecutor) driver).executeScript(
                     "if (navigator.plugins && navigator.plugins.length) {" +
                             "  /* noop - keep plugins array */" +
                             "}"
             );
 
-
         } catch (Exception e) {
-            try { driver.quit(); } catch (Exception ignore) {}
+            try {
+                driver.quit();
+            } catch (Exception ignore) {}
             throw (RuntimeException)e;
         }
 
