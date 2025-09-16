@@ -10,6 +10,16 @@ google:
   news:
     base-url: "https://news.google.com/rss/search?q="
 
+deepseek:
+  email: ${DEEPSEEK_EMAIL:}
+  password: ${DEEPSEEK_PASSWORD:}
+
+ai:
+  prompt: |
+    Site: {siteName}
+    Theme: {theme}
+    Content: {content}
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/DSDataAnalyserDB
