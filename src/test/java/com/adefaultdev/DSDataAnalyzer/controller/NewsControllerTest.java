@@ -76,7 +76,7 @@ class NewsSiteControllerTest {
         List<NewsSiteDTO> result = newsSiteController.getAllSites();
 
         assertEquals(2, result.size());
-        assertEquals("Site1", result.getFirst().name());
+        assertEquals("TestName1", result.getFirst().name());
         verify(newsSiteService, times(1)).getAllSites();
     }
 
@@ -92,13 +92,13 @@ class NewsSiteControllerTest {
                 "TestName1",
                 0d);
 
-        when(newsSiteService.getSiteByName("Example")).thenReturn(dto);
+        when(newsSiteService.getSiteByName("TestName1")).thenReturn(dto);
 
-        NewsSiteDTO result = newsSiteController.getSiteByName("Example");
+        NewsSiteDTO result = newsSiteController.getSiteByName("TestName1");
 
         assertNotNull(result);
-        assertEquals("Example", result.name());
-        verify(newsSiteService, times(1)).getSiteByName("Example");
+        assertEquals("TestName1", result.name());
+        verify(newsSiteService, times(1)).getSiteByName("TestName1");
     }
 
     /**
