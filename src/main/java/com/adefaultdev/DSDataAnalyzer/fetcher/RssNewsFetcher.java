@@ -28,6 +28,8 @@ public class RssNewsFetcher {
 
     private final String feedUrl;
 
+    SyndFeedInput feedInput = new SyndFeedInput();
+
     /**
      * Constructs a new RssNewsFetcher with the specified feed URL.
      *
@@ -42,36 +44,49 @@ public class RssNewsFetcher {
     }
 
     /**
-     * Fetches raw RSS feed entries from the configured URL.
-     * Establishes a connection with timeout settings, parses the RSS feed,
-     * and processes entries to ensure proper link handling.
+     * Creates an {@link XmlReader} from the feed URL.
+     * <p>
+     * Opens a connection to the configured RSS feed URL with a 10-second
+     * connect and read timeout.
+     * </p>
      *
-     * <p>Processing Details:</p>
-     * <ul>
-     *   <li>Sets connection timeout to 10 seconds</li>
-     *   <li>Sets read timeout to 10 seconds</li>
-     *   <li>Normalizes entry links by using source URI when available</li>
-     * </ul>
-     *
-     * @return a list of {@link SyndEntry} objects representing the RSS feed entries
-     * @throws Exception if any error occurs during feed retrieval or parsing
+     * @return {@link XmlReader} for reading the RSS feed
+     * @throws Exception if the URL is malformed or connection cannot be established
      */
-    public List<SyndEntry> fetchRawEntries() throws Exception {
+    protected XmlReader createXmlReader() throws Exception {
         URI feedSource = new URI(feedUrl);
         URLConnection connection = feedSource.toURL().openConnection();
         connection.setConnectTimeout(10000);
         connection.setReadTimeout(10000);
+        return new XmlReader(connection.getInputStream());
+    }
 
-        try (XmlReader reader = new XmlReader(connection.getInputStream())) {
-            SyndFeedInput input = new SyndFeedInput();
-            SyndFeed feed = input.build(reader);
 
+    /**
+     * Fetches raw RSS feed entries from the configured feed URL.
+     * <p>
+     * Establishes a connection using {@link #createXmlReader()}, parses the RSS feed,
+     * and normalizes each entry's link using {@link SyndEntry#getSource() source URI} if present.
+     * </p>
+     *
+     * <p>Processing details:</p>
+     * <ul>
+     *     <li>Connection timeout: 10 seconds</li>
+     *     <li>Read timeout: 10 seconds</li>
+     *     <li>Links are normalized using source URI if available</li>
+     * </ul>
+     *
+     * @return list of {@link SyndEntry} objects representing the RSS feed entries
+     * @throws Exception if any error occurs during feed retrieval or parsing
+     */
+    public List<SyndEntry> fetchRawEntries() throws Exception {
+        try (XmlReader reader = createXmlReader()) {
+            SyndFeed feed = feedInput.build(reader);
             for (SyndEntry entry : feed.getEntries()) {
                 if (entry.getSource() != null && entry.getSource().getUri() != null) {
                     entry.setLink(entry.getSource().getUri());
                 }
             }
-
             return feed.getEntries();
         }
     }
