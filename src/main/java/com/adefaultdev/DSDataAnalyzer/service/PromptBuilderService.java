@@ -1,45 +1,52 @@
 package com.adefaultdev.DSDataAnalyzer.service;
 
 import com.adefaultdev.DSDataAnalyzer.dto.NewsContentDTO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Service for creating prompt for DeepSeek.
+ * Service for creating structured prompt for DeepSeek.
  *
  * @since 1.1.0
- * @author ADefaultDev
+ * author ADefaultDev
  */
 @Service
 public class PromptBuilderService {
 
-    @Value("${ai.prompt}")
-    private String promptTemplate;
-
     /**
-     * Creating prompt for one news.
+     * Create prompt for a list of news for comparative analysis.
      *
-     * @return ready to use prompt.
-     */
-    public String buildPrompt(NewsContentDTO news) {
-        return promptTemplate
-                .replace("{siteName}", news.siteName() != null ? news.siteName() : "unknown site")
-                .replace("{theme}", news.theme() != null ? news.theme() : "no theme")
-                .replace("{content}", news.content() != null ? news.content() : "no text");
-    }
-
-    /**
-     * Creating prompt for list of news.
-     *
-     * @return ready to use prompt.
+     * @param newsList list of news to analyze
+     * @return ready-to-use prompt
      */
     public String buildPrompt(List<NewsContentDTO> newsList) {
         String newsBlock = newsList.stream()
-                .map(this::buildPrompt)
-                .collect(Collectors.joining("\n\n"));
+                .map(news -> String.format(
+                        "{ \"site\": \"%s\", \"theme\": \"%s\", \"content\": \"%s\" }",
+                        news.siteName() != null ? news.siteName() : "unknown site",
+                        news.theme() != null ? news.theme() : "no theme",
+                        news.content() != null ? news.content() : "no text"
+                ))
+                .collect(Collectors.joining(",\n"));
 
-        return "Analyze the news and return the result:\n\n" + newsBlock;
+        return "You receive a list of news articles in JSON format. "
+                + "Compare them with each other and evaluate the credibility of each one on a scale from 1 to 5:\n"
+                + "1 - almost certainly false\n"
+                + "2 - likely false\n"
+                + "3 - cannot be determined (insufficient or contradictory information)\n"
+                + "4 - likely true\n"
+                + "5 - almost certainly true\n\n"
+                + "The rating must depend on how consistent each article is with the others. "
+                + "If most articles agree and one contradicts, the contradictory one should get a low rating. "
+                + "If it’s impossible to decide, assign 3.\n\n"
+                + "Return the result strictly as a JSON array, with each object containing:\n"
+                + "{\n"
+                + "  \"site\": \"...\",\n"
+                + "  \"theme\": \"...\",\n"
+                + "  \"summary\": \"short summary (1–2 sentences)\",\n"
+                + "  \"rating\": number from 1 to 5\n"
+                + "}\n\n"
+                + "Here is the input list:\n[\n" + newsBlock + "\n]";
     }
 }
