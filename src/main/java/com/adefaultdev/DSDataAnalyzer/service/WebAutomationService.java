@@ -62,7 +62,7 @@ public class WebAutomationService {
      * @param headless whether to run the browser in headless mode
      * @return a configured ChromeDriver instance
      */
-    private ChromeDriver initStealthDriver(boolean headless) {
+    ChromeDriver initStealthDriver(boolean headless) {
         ChromeOptions options = new ChromeOptions();
 
         if (headless) {
