@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link NewsSiteService}.
+ * Unit tests for  {@link NewsSiteService}.
  *
  * @since 1.2.0
  * @author ADefaultDev
