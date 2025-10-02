@@ -3,7 +3,6 @@ package com.adefaultdev.DSDataAnalyzer.service;
 import com.adefaultdev.DSDataAnalyzer.entity.NewsContent;
 import com.adefaultdev.DSDataAnalyzer.entity.NewsSite;
 import com.adefaultdev.DSDataAnalyzer.repository.NewsContentRepository;
-import com.adefaultdev.DSDataAnalyzer.security.JwtAuthFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
